@@ -10,7 +10,6 @@ TELEGRAM_CHAT_ID = "your_chat_id_here"
 def webhook():
     data = request.json
     message = f"💸 New transaction:
-
 {data}"
     send_message(message)
     return 'ok', 200
