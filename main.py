@@ -1,26 +1,24 @@
+from fastapi import FastAPI, Request
+import os
 import requests
-from flask import Flask, request
 
-app = Flask(__name__)
+app = FastAPI()
 
-TELEGRAM_BOT_TOKEN = "your_bot_token_here"
-TELEGRAM_CHAT_ID = "your_chat_id_here"
-
-@app.route('/', methods=['POST'])
-def webhook():
-    data = request.json
-    message = f"💸 New transaction:{data}"
-    send_message(message)
-    return 'ok', 200
+TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
 def send_message(text):
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    payload = {"chat_id": TELEGRAM_CHAT_ID, "text": text}
-    requests.post(url, json=payload)
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    payload = {"chat_id": CHAT_ID, "text": text}
+    requests.post(url, data=payload)
 
-@app.route('/', methods=['GET'])
-def home():
-    return 'Bot is running!', 200
+@app.post("/")
+async def webhook_handler(request: Request):
+    data = await request.json()
+    print("✅ Webhook received:", data)
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=3000)
+    # Send a message with basic TX info (you can customize this later)
+    message = f"🔔 New TX:\n{data}"
+    send_message(message)
+
+    return {"status": "ok"}
